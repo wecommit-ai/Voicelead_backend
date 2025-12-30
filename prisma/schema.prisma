@@ -17,24 +17,31 @@ model User {
 }
 
 model Booth {
-  id       Int      @id @default(autoincrement())
-  name     String
-  event    String
-  location String
-  userId   Int
-  user     User     @relation(fields: [userId], references: [id])
-  leads    Lead[]
-  createdAt   DateTime @default(now())
+  id        Int      @id @default(autoincrement())
+  name      String
+  event     String
+  location  String
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  leads     Lead[]
+  createdAt DateTime @default(now())
 }
 
 model Lead {
-  id      Int      @id @default(autoincrement())
-  name    String?
-  email   String?
-  phone   String?
-  company String?
-  notes   String?
+  id      Int   @id @default(autoincrement())
   boothId Int
-  booth   Booth    @relation(fields: [boothId], references: [id])
-  createdAt   DateTime @default(now())
+  booth   Booth @relation(fields: [boothId], references: [id], onDelete: Cascade)
+
+  name     String
+  email    String?
+  company  String?
+  phone    String?
+  interest String?
+
+  imageUrl   String? // 🖼️ business card / image upload
+  transcript String? // 📝 full audio transcription
+
+  status    String
+  source    String
+  createdAt DateTime @default(now())
 }

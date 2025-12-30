@@ -23,6 +23,59 @@ router.post("/process-audio", upload.single("audio"), async (req, res) => {
   res.json({ success: true, data: lead });
 });
 
+router.post("/capture", async (req, res) => {
+  try {
+    const {
+      boothId,
+      name,
+      email,
+      company,
+      phone,
+      interest,
+      transcript,
+      imageUrl,
+      source = "voice",
+    } = req.body;
+
+    // 🔹 TEMP: default boothId for testing
+    const resolvedBoothId = boothId ? Number(boothId) : 1;
+
+    if (!name || !email) {
+      return res.status(400).json({
+        success: false,
+        error: "name and email are required",
+      });
+    }
+
+    const lead = await prisma.lead.create({
+      data: {
+        boothId: resolvedBoothId,
+        name,
+        email,
+        company: company || null,
+        phone: phone || null,
+        interest: interest || null,
+        transcript: transcript || null,
+        imageUrl: imageUrl || null,
+        status: "new",
+        source,
+      },
+    });
+
+    return res.json({
+      success: true,
+      data: lead,
+    });
+  } catch (error) {
+    console.error("Create lead error:", error);
+    return res.status(500).json({
+      success: false,
+      error: "Failed to save lead",
+    });
+  }
+});
+
+
 
 
 

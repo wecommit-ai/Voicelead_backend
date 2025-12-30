@@ -56,6 +56,7 @@ If unknown, use null.
       phone: leadData.phone ?? null,
       company: leadData.company ?? null,
       interest: leadData.interest ?? null,
+      transcript: transcription.text, 
     };
   } finally {
     if (fs.existsSync(tempFilePath)) {
