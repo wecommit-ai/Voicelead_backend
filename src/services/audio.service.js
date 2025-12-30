@@ -27,36 +27,65 @@ async function processAudioToLead(audioBuffer, boothId, originalName) {
       model: "whisper-1",
     });
 
-    // 2️⃣ Extract structured data
+    // 2️⃣ Extract structured data using JSON Schema
     const completion = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
         {
           role: "system",
-          content: `
-You extract lead information from text.
-Return ONLY valid JSON with keys:
-name, email, phone, company, interest.
-If unknown, use null.
-          `.trim(),
+          content: "You are a helpful assistant that extracts lead information from text.",
         },
         {
           role: "user",
           content: transcription.text,
         },
       ],
-      response_format: { type: "json_object" },
+      response_format: {
+        type: "json_schema",
+        json_schema: {
+          name: "lead_extraction",
+          strict: true,
+          schema: {
+            type: "object",
+            properties: {
+              name: {
+                type: ["string", "null"],
+                description: "The name of the person."
+              },
+              email: {
+                type: ["string", "null"],
+                description: "The email address of the person."
+              },
+              phone: {
+                type: ["string", "null"],
+                description: "The phone number."
+              },
+              company: {
+                type: ["string", "null"],
+                description: "The company name."
+              },
+              interest: {
+                type: ["string", "null"],
+                description: "The specific product or service interest."
+              }
+            },
+            // In Structured Outputs, all properties must be required
+            required: ["name", "email", "phone", "company", "interest"],
+            additionalProperties: false,
+          },
+        },
+      },
     });
 
     const leadData = JSON.parse(completion.choices[0].message.content);
 
     return {
-      name: leadData.name ?? null,
-      email: leadData.email ?? null,
-      phone: leadData.phone ?? null,
-      company: leadData.company ?? null,
-      interest: leadData.interest ?? null,
-      transcript: transcription.text, 
+      name: leadData.name,
+      email: leadData.email,
+      phone: leadData.phone,
+      company: leadData.company,
+      interest: leadData.interest,
+      transcript: transcription.text,
     };
   } finally {
     if (fs.existsSync(tempFilePath)) {
