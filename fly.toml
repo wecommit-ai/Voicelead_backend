@@ -1,0 +1,42 @@
+# fly.toml app configuration file generated for voicelead-backend on 2025-12-31T18:53:09+05:30
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'voicelead-backend'
+primary_region = 'nrt'
+
+[build]
+
+[deploy]
+  # Uncomment below if you need to run migrations on deploy
+  # release_command = 'npx prisma migrate deploy'
+
+[env]
+  NODE_ENV = 'production'
+  PORT = '3000'
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = 'stop'
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ['app']
+
+  [http_service.concurrency]
+    type = 'connections'
+    hard_limit = 25
+    soft_limit = 20
+
+  [[http_service.checks]]
+    interval = '15s'
+    timeout = '5s'
+    grace_period = '10s'
+    method = 'GET'
+    path = '/health'
+
+[[vm]]
+  memory = '512mb'
+  cpus = 1
+  memory_mb = 512
