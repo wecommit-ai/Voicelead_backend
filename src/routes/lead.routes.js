@@ -69,7 +69,7 @@ router.post("/capture", async (req, res) => {
       interest,
       transcript,
       imageUrl,
-      source = "voice",
+      source ,
     } = req.body;
 
     // 🔹 TEMP: default boothId for testing
