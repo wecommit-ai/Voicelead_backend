@@ -84,11 +84,11 @@ router.post("/capture", async (req, res) => {
     }
 
     // ✅ Require at least email OR phone
-    if (!email && !phone) {
+    if (!email && !phone && !interest && !name && !company) {
       return res.status(400).json({
         success: false,
         error:
-          "Please provide at least an email or phone number to save this lead",
+          "Please provide Some lead information (at least email or phone).",
       });
     }
 
