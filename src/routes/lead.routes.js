@@ -18,7 +18,8 @@ router.post("/process-audio", upload.single("audio"), async (req, res) => {
   const lead = await processAudioToLead(
     req.file.buffer,
     boothId,
-    req.file.originalname
+    req.file.originalname,
+    req.file.mimetype
   );
 
   res.json({ success: true, data: lead });
@@ -68,14 +69,19 @@ router.post("/capture", async (req, res) => {
       phone,
       interest,
       transcript,
-      imageUrl,
+      ocrText,
       source,
+      type,
+      captureMode,
+      confidence,
+      remarks,
+      rawAudioUrl,
     } = req.body;
 
-    console.log("📥 /capture - boothId received:", boothId); // ✅ ADD THIS
-    console.log("📥 /capture - boothId type:", typeof boothId); // ✅ ADD THIS
+    console.log("📥 /capture - boothId received:", boothId);
+    console.log("📥 /capture - boothId type:", typeof boothId);
 
-    // ✅ ADD THIS VALIDATION
+    // ✅ Validation
     if (!boothId) {
       return res.status(400).json({
         success: false,
@@ -83,12 +89,12 @@ router.post("/capture", async (req, res) => {
       });
     }
 
-    // ✅ Require at least email OR phone
+    // ✅ Require at least one field
     if (!email && !phone && !interest && !name && !company) {
       return res.status(400).json({
         success: false,
         error:
-          "Please provide Some lead information (at least email or phone).",
+          "Please provide some lead information (at least one field).",
       });
     }
 
@@ -101,9 +107,14 @@ router.post("/capture", async (req, res) => {
         phone: phone || null,
         interest: interest || null,
         transcript: transcript || null,
-        imageUrl: imageUrl || null,
+        ocrText: ocrText || null,
+        source: source || null,
+        type: type || null,
+        confidence: confidence || null,
+        remarks: remarks || null,
+        rawAudioUrl: rawAudioUrl || null,
         status: "new",
-        source: source || "manual",
+        captureMode: captureMode || "manual",
       },
     });
 

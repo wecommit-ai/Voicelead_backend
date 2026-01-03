@@ -1,2 +1,19 @@
 node_modules
 .env
+
+# Test fixtures (audio and image files)
+src/tests/fixtures/*.mp3
+src/tests/fixtures/*.wav
+src/tests/fixtures/*.m4a
+src/tests/fixtures/*.webm
+src/tests/fixtures/*.ogg
+src/tests/fixtures/*.jpg
+src/tests/fixtures/*.jpeg
+src/tests/fixtures/*.png
+src/tests/fixtures/*.webp
+
+# Test output reports
+src/tests/output/
+
+# Keep the README
+!src/tests/fixtures/README.md

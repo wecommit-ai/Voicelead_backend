@@ -40,10 +40,16 @@ model Lead {
   phone    String?
   interest String?
 
-  imageUrl   String?
-  transcript String?
+  source      String?  // URL for voice recording or image
+  type        String?  // 'voice', 'image', or 'manual'
+  transcript  String?  // For voice recordings
+  ocrText     String?  // For image OCR
+  
+  remarks     String?  // Fallback field for partial AI outputs
+  confidence  Float?   // AI confidence score (0.0 to 1.0)
+  rawAudioUrl String?  // Temporary storage URL for original audio (7 days)
 
-  status    String   @default("new")
-  source    String   @default("manual")
-  createdAt DateTime @default(now())
+  status      String   @default("new")
+  captureMode String   @default("manual") // 'voice', 'image', or 'manual'
+  createdAt   DateTime @default(now())
 }
