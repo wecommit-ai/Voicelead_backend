@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const { processAudioToLead } = require('../services/audio.service');
+const { processAudioToLeadAsync, uploadAudioToS3 } = require("../services/audio.service");
 const { processImageToLead } = require('../services/ocr.service');
 const authMiddleware = require('../middleware/auth.middleware');
 const prisma = require('../lib/prisma');

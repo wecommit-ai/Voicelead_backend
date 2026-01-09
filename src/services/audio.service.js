@@ -487,4 +487,4 @@ You MUST return a valid JSON object matching the schema.
   }
 }
 
-module.exports = { processAudioToLead };
+module.exports = { uploadAudioToS3, processAudioToLeadAsync };
