@@ -9,44 +9,99 @@ const logger = require('../config/logger');
 
 const upload = multer({ storage: multer.memoryStorage() });
 
+// router.post("/process-audio", upload.single("audio"), async (req, res) => {
+//   const { boothId } = req.body;
+
+//   logger.info('🎤 Audio processing request received', {
+//     boothId,
+//     filename: req.file?.originalname,
+//     mimetype: req.file?.mimetype,
+//     size: req.file?.size
+//   });
+
+//   if (!req.file) {
+//     logger.warn('⚠️ Audio processing failed - no file uploaded');
+//     return res.status(400).json({ success: false, error: "No audio file" });
+//   }
+
+//   try {
+//     const lead = await processAudioToLead(
+//       req.file.buffer,
+//       boothId,
+//       req.file.originalname,
+//       req.file.mimetype
+//     );
+
+//     logger.info('✅ Audio processing completed successfully', {
+//       boothId,
+//       confidence: lead.confidence,
+//       hasRemarks: !!lead.remarks
+//     });
+
+//     res.json({ success: true, data: lead });
+//   } catch (error) {
+//     logger.error('❌ Audio processing endpoint error', {
+//       error: error.message,
+//       stack: error.stack,
+//       boothId,
+//       filename: req.file?.originalname
+//     });
+//     res.status(500).json({ success: false, error: error.message });
+//   }
+// });
+
+
 router.post("/process-audio", upload.single("audio"), async (req, res) => {
   const { boothId } = req.body;
 
-  logger.info('🎤 Audio processing request received', {
+  logger.info("🎤 Audio upload request received", {
     boothId,
     filename: req.file?.originalname,
+    size: req.file?.size,
     mimetype: req.file?.mimetype,
-    size: req.file?.size
   });
 
-  if (!req.file) {
-    logger.warn('⚠️ Audio processing failed - no file uploaded');
-    return res.status(400).json({ success: false, error: "No audio file" });
+  // ✅ Hard validation
+  if (!req.file || !req.file.buffer || req.file.buffer.length === 0) {
+    return res.status(400).json({
+      success: false,
+      error: "Invalid or empty audio file",
+    });
   }
 
   try {
-    const lead = await processAudioToLead(
+    // 🔥 Upload ONCE, quickly
+    const audioUrl = await uploadAudioToS3(
       req.file.buffer,
-      boothId,
       req.file.originalname,
-      req.file.mimetype
+      req.file.mimetype,
+      false
     );
 
-    logger.info('✅ Audio processing completed successfully', {
-      boothId,
-      confidence: lead.confidence,
-      hasRemarks: !!lead.remarks
+    // ✅ Respond immediately (NO AI HERE)
+    res.status(202).json({
+      success: true,
+      message: "Audio uploaded and queued for processing",
+      source: audioUrl,
     });
 
-    res.json({ success: true, data: lead });
+    // 🚀 Background processing (fire-and-forget)
+    processAudioToLeadAsync({
+      audioUrl,
+      boothId,
+      originalName: req.file.originalname,
+      mimetype: req.file.mimetype,
+    });
   } catch (error) {
-    logger.error('❌ Audio processing endpoint error', {
+    logger.error("❌ Audio upload failed", {
       error: error.message,
       stack: error.stack,
-      boothId,
-      filename: req.file?.originalname
     });
-    res.status(500).json({ success: false, error: error.message });
+
+    return res.status(500).json({
+      success: false,
+      error: "Audio upload failed",
+    });
   }
 });
 
